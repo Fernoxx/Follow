@@ -159,44 +159,44 @@ export default function UnfollowPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-300 mb-2">
             Unfollow Management
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-500">
             Manage your follows with advanced filtering options
           </p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-gray-900 rounded-lg shadow p-6 border border-gray-800">
             <div className="flex items-center">
-              <Users className="h-8 w-8 text-blue-600" />
+              <Users className="h-8 w-8 text-blue-400" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Following</p>
-                <p className="text-2xl font-semibold text-gray-900">{users.length}</p>
+                <p className="text-sm font-medium text-gray-400">Total Following</p>
+                <p className="text-2xl font-semibold text-gray-200">{users.length}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-gray-900 rounded-lg shadow p-6 border border-gray-800">
             <div className="flex items-center">
-              <UserMinus className="h-8 w-8 text-red-600" />
+              <UserMinus className="h-8 w-8 text-red-400" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Filtered Results</p>
-                <p className="text-2xl font-semibold text-gray-900">{filteredUsers.length}</p>
+                <p className="text-sm font-medium text-gray-400">Filtered Results</p>
+                <p className="text-2xl font-semibold text-gray-200">{filteredUsers.length}</p>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-gray-900 rounded-lg shadow p-6 border border-gray-800">
             <div className="flex items-center">
-              <Star className="h-8 w-8 text-yellow-600" />
+              <Star className="h-8 w-8 text-yellow-400" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Avg Neynar Score</p>
-                <p className="text-2xl font-semibold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">Avg Neynar Score</p>
+                <p className="text-2xl font-semibold text-gray-200">
                   {users.length > 0 
                     ? (users.reduce((sum, user) => sum + (user.neynar_score || 0), 0) / users.length).toFixed(2)
                     : '0.00'
@@ -214,18 +214,18 @@ export default function UnfollowPage() {
         />
 
         {/* User List */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">
+        <div className="bg-gray-900 rounded-lg shadow border border-gray-800">
+          <div className="px-6 py-4 border-b border-gray-800">
+            <h2 className="text-lg font-medium text-gray-200">
               Following Users ({filteredUsers.length})
             </h2>
           </div>
           
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-800">
             {filteredUsers.length === 0 ? (
               <div className="px-6 py-12 text-center">
-                <UserMinus className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No users found</h3>
+                <UserMinus className="mx-auto h-12 w-12 text-gray-500" />
+                <h3 className="mt-2 text-sm font-medium text-gray-300">No users found</h3>
                 <p className="mt-1 text-sm text-gray-500">
                   Try adjusting your filters or search query.
                 </p>

@@ -42,7 +42,7 @@ export function UserCard({ user, onUnfollow, isUnfollowing }: UserCardProps) {
   }
 
   return (
-    <div className="px-6 py-4 hover:bg-gray-50 transition-colors">
+    <div className="px-6 py-4 hover:bg-gray-800 transition-colors">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {/* Avatar */}
@@ -57,18 +57,18 @@ export function UserCard({ user, onUnfollow, isUnfollowing }: UserCardProps) {
           {/* User Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center space-x-2">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-gray-200 truncate">
                 {user.display_name}
               </p>
-              <span className="text-sm text-gray-500">@{user.username}</span>
+              <span className="text-sm text-gray-400">@{user.username}</span>
               {user.verifications.length > 0 && (
-                <CheckCircle className="h-4 w-4 text-blue-500" />
+                <CheckCircle className="h-4 w-4 text-blue-400" />
               )}
             </div>
             
             <div className="flex items-center space-x-4 mt-1">
               {/* Followers/Following */}
-              <div className="flex items-center space-x-1 text-sm text-gray-500">
+              <div className="flex items-center space-x-1 text-sm text-gray-400">
                 <Users className="h-4 w-4" />
                 <span>{user.follower_count.toLocaleString()} followers</span>
               </div>
@@ -77,12 +77,12 @@ export function UserCard({ user, onUnfollow, isUnfollowing }: UserCardProps) {
               {user.viewer_context && (
                 <div className="flex items-center space-x-1 text-sm">
                   {user.viewer_context.followed_by ? (
-                    <div className="flex items-center space-x-1 text-green-600">
+                    <div className="flex items-center space-x-1 text-green-400">
                       <CheckCircle className="h-4 w-4" />
                       <span>Follows you back</span>
                     </div>
                   ) : (
-                    <div className="flex items-center space-x-1 text-red-600">
+                    <div className="flex items-center space-x-1 text-red-400">
                       <XCircle className="h-4 w-4" />
                       <span>Doesn't follow back</span>
                     </div>
@@ -105,7 +105,7 @@ export function UserCard({ user, onUnfollow, isUnfollowing }: UserCardProps) {
 
               {/* Last Post Date */}
               {user.last_post_date && (
-                <div className="flex items-center space-x-1 text-sm text-gray-500">
+                <div className="flex items-center space-x-1 text-sm text-gray-400">
                   <Calendar className="h-4 w-4" />
                   <span>
                     Last post: {getDaysSinceLastPost(user.last_post_date)} days ago
