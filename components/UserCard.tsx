@@ -14,7 +14,7 @@ interface User {
     followed_by: boolean
   }
   neynar_score?: number
-  last_post_date?: string
+  last_post_date?: string | null
 }
 
 interface UserCardProps {
@@ -24,12 +24,11 @@ interface UserCardProps {
 }
 
 export function UserCard({ user, onUnfollow, isUnfollowing }: UserCardProps) {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
-  }
-
   const getDaysSinceLastPost = (dateString: string) => {
     const lastPost = new Date(dateString)
+    if (Number.isNaN(lastPost.getTime())) {
+      return null
+    }
     const now = new Date()
     const diffTime = Math.abs(now.getTime() - lastPost.getTime())
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
@@ -40,6 +39,11 @@ export function UserCard({ user, onUnfollow, isUnfollowing }: UserCardProps) {
     if (score >= 0.6) return 'text-yellow-600'
     return 'text-red-600'
   }
+
+  const daysSinceLastPost =
+    user.last_post_date !== undefined && user.last_post_date !== null
+      ? getDaysSinceLastPost(user.last_post_date)
+      : null
 
   return (
     <div className="px-6 py-4 hover:bg-gray-50 transition-colors">
@@ -103,15 +107,13 @@ export function UserCard({ user, onUnfollow, isUnfollowing }: UserCardProps) {
                 </div>
               )}
 
-              {/* Last Post Date */}
-              {user.last_post_date && (
-                <div className="flex items-center space-x-1 text-sm text-gray-500">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    Last post: {getDaysSinceLastPost(user.last_post_date)} days ago
-                  </span>
-                </div>
-              )}
+                {/* Last Post Date */}
+                {daysSinceLastPost !== null && (
+                  <div className="flex items-center space-x-1 text-sm text-gray-500">
+                    <Calendar className="h-4 w-4" />
+                    <span>Last post: {daysSinceLastPost} days ago</span>
+                  </div>
+                )}
             </div>
           </div>
         </div>

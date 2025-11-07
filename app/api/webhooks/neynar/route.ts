@@ -1,40 +1,51 @@
+import crypto from 'crypto'
+
 import { NextRequest, NextResponse } from 'next/server'
-import { NeynarService } from '@/lib/neynar'
+
+import { env } from '@/lib/env.server'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    
-    // Verify webhook signature if needed
+    const rawBody = await request.text()
     const signature = request.headers.get('x-neynar-signature')
-    const webhookSecret = process.env.WEBHOOK_SECRET
-    
-    if (webhookSecret && signature) {
-      // Add signature verification logic here
-      // This is a placeholder - implement proper signature verification
+
+    if (env.WEBHOOK_SECRET) {
+      if (!signature) {
+        return NextResponse.json(
+          { error: 'Missing Neynar signature header' },
+          { status: 401 },
+        )
+      }
+
+      const expectedSignature = crypto
+        .createHmac('sha256', env.WEBHOOK_SECRET)
+        .update(rawBody)
+        .digest('hex')
+
+      if (!timingSafeEqual(signature, expectedSignature)) {
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+      }
     }
 
-    // Handle different webhook events
+    const body = JSON.parse(rawBody)
+
     const { type, data } = body
-    
+
     switch (type) {
       case 'user.follow':
         console.log('User follow event:', data)
-        // Handle follow event
         break
-        
+
       case 'user.unfollow':
         console.log('User unfollow event:', data)
-        // Handle unfollow event
         break
-        
+
       case 'cast.created':
         console.log('Cast created event:', data)
-        // Handle new cast event - update last post date
         break
-        
+
       default:
-        console.log('Unknown webhook event:', type, data)
+        console.log('Unhandled Neynar webhook event:', type, data)
     }
 
     return NextResponse.json({ success: true })
@@ -42,11 +53,22 @@ export async function POST(request: NextRequest) {
     console.error('Webhook error:', error)
     return NextResponse.json(
       { error: 'Webhook processing failed' },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
 
 export async function GET() {
   return NextResponse.json({ message: 'Neynar webhook endpoint' })
+}
+
+function timingSafeEqual(signature: string, expectedSignature: string) {
+  const sigBuffer = Buffer.from(signature, 'utf8')
+  const expectedBuffer = Buffer.from(expectedSignature, 'utf8')
+
+  if (sigBuffer.length !== expectedBuffer.length) {
+    return false
+  }
+
+  return crypto.timingSafeEqual(sigBuffer, expectedBuffer)
 }

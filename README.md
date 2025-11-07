@@ -33,9 +33,10 @@ A powerful web application for managing your social media follows with advanced 
 
 4. Configure your `.env.local` file:
    ```
-   NEXT_PUBLIC_NEYNAR_API_KEY=your_neynar_api_key_here
-   NEXT_PUBLIC_USER_FID=your_fid_here
-   NEXT_PUBLIC_SIGNER_UUID=your_signer_uuid_here
+   NEYNAR_API_KEY=your_neynar_api_key_here
+   USER_FID=your_fid_here
+   SIGNER_UUID=your_signer_uuid_here
+   # Optional:
    WEBHOOK_SECRET=your_webhook_secret_here
    ```
 
@@ -48,9 +49,10 @@ A powerful web application for managing your social media follows with advanced 
 
 ## API Endpoints
 
-### Webhooks
-
-- `POST /api/webhooks/neynar` - Neynar webhook endpoint for real-time updates
+- `GET /api/neynar/following` – Server-side proxy for Neynar following feed
+- `DELETE /api/neynar/following` – Secure unfollow endpoint (uses Neynar DELETE API)
+- `GET /api/neynar/users/[fid]` – User metadata + last post timestamp
+- `POST /api/webhooks/neynar` – Neynar webhook endpoint with signature verification
 
 ## Filtering Options
 
@@ -66,7 +68,6 @@ A powerful web application for managing your social media follows with advanced 
 - TypeScript
 - Tailwind CSS
 - Neynar API
-- Axios
 
 ## Contributing
 

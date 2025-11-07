@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Filter, UserMinus, Calendar, Star, Users } from 'lucide-react'
+import { UserMinus, Star, Users } from 'lucide-react'
 import { NeynarService } from '@/lib/neynar'
 import { UserCard } from '@/components/UserCard'
 import { FilterPanel } from '@/components/FilterPanel'
@@ -21,7 +21,7 @@ interface User {
     followed_by: boolean
   }
   neynar_score?: number
-  last_post_date?: string
+  last_post_date?: string | null
 }
 
 interface FilterOptions {
@@ -38,6 +38,7 @@ export default function UnfollowPage() {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [unfollowing, setUnfollowing] = useState<Set<number>>(new Set())
+  const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<FilterOptions>({
     showNotFollowingBack: false,
     showLowNeynarScore: false,
@@ -58,34 +59,57 @@ export default function UnfollowPage() {
   const fetchFollowingUsers = async () => {
     try {
       setLoading(true)
+      setError(null)
       const neynarService = new NeynarService()
-      const followingData = await neynarService.getFollowingFeed()
-      
+      const { users: followingUsers } = await neynarService.getFollowingFeed()
+
       // Process users to add additional data
       const processedUsers = await Promise.all(
-        followingData.map(async (user: any) => {
-          const neynarScore = await neynarService.getNeynarScore(user.fid)
-          const lastPostDate = await neynarService.getLastPostDate(user.fid)
-          
-          return {
-            fid: user.fid,
-            username: user.username,
-            display_name: user.display_name,
-            pfp_url: user.pfp_url,
-            follower_count: user.follower_count,
-            following_count: user.following_count,
-            verifications: user.verifications || [],
-            active_status: user.active_status,
-            viewer_context: user.viewer_context,
-            neynar_score: neynarScore,
-            last_post_date: lastPostDate
+        followingUsers.map(async (user: any) => {
+          try {
+            const { user: userDetails, lastPostTimestamp } =
+              await neynarService.getUserDetails(user.fid)
+
+            const neynarScore = calculateNeynarScore(userDetails)
+
+            return {
+              fid: user.fid,
+              username: user.username,
+              display_name: user.display_name,
+              pfp_url: user.pfp_url,
+              follower_count: user.follower_count,
+              following_count: user.following_count,
+              verifications: user.verifications || [],
+              active_status: user.active_status,
+              viewer_context: user.viewer_context,
+              neynar_score: neynarScore,
+              last_post_date: lastPostTimestamp,
+            }
+          } catch (error) {
+            console.error(`Failed to enrich user ${user.fid}`, error)
+            return {
+              fid: user.fid,
+              username: user.username,
+              display_name: user.display_name,
+              pfp_url: user.pfp_url,
+              follower_count: user.follower_count,
+              following_count: user.following_count,
+              verifications: user.verifications || [],
+              active_status: user.active_status,
+              viewer_context: user.viewer_context,
+              neynar_score: 0.5,
+              last_post_date: null,
+            }
           }
-        })
+        }),
       )
-      
+
       setUsers(processedUsers)
     } catch (error) {
       console.error('Error fetching following users:', error)
+      setError(
+        error instanceof Error ? error.message : 'Unable to load following data right now.',
+      )
     } finally {
       setLoading(false)
     }
@@ -133,6 +157,17 @@ export default function UnfollowPage() {
 
   const handleUnfollow = async (fid: number) => {
     try {
+      setError(null)
+      const user = users.find((u) => u.fid === fid)
+      if (
+        user &&
+        !window.confirm(
+          `Are you sure you want to unfollow ${user.display_name || user.username}?`,
+        )
+      ) {
+        return
+      }
+
       setUnfollowing(prev => new Set(prev).add(fid))
       const neynarService = new NeynarService()
       await neynarService.unfollowUser(fid)
@@ -141,6 +176,9 @@ export default function UnfollowPage() {
       setUsers(prev => prev.filter(user => user.fid !== fid))
     } catch (error) {
       console.error('Error unfollowing user:', error)
+      setError(
+        error instanceof Error ? error.message : 'Failed to unfollow user. Please try again.',
+      )
     } finally {
       setUnfollowing(prev => {
         const newSet = new Set(prev)
@@ -170,6 +208,12 @@ export default function UnfollowPage() {
             Manage your follows with advanced filtering options
           </p>
         </div>
+
+        {error && (
+          <div className="mb-6 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -245,4 +289,24 @@ export default function UnfollowPage() {
       </div>
     </div>
   )
+}
+
+function calculateNeynarScore(userDetails: any): number {
+  if (!userDetails) {
+    return 0.5
+  }
+
+  let score = 0.5
+  const followerCount = userDetails.follower_count ?? 0
+
+  if (followerCount > 1000) score += 0.2
+  if (followerCount > 10000) score += 0.1
+  if (Array.isArray(userDetails.verifications) && userDetails.verifications.length > 0) {
+    score += 0.1
+  }
+  if (userDetails.active_status === 'active') {
+    score += 0.1
+  }
+
+  return Math.min(score, 1.0)
 }
