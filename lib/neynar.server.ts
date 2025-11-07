@@ -7,7 +7,7 @@ const API_BASE_URL = 'https://api.neynar.com/v2'
 type FetchOptions = {
   path: string
   init?: RequestInit
-  searchParams?: Record<string, string | number | undefined>
+  searchParams?: Record<string, string | number | boolean | undefined>
 }
 
 async function request<T>({ path, init, searchParams }: FetchOptions): Promise<T> {
